@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BooksAreUs.org - Books</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #666666;
+            margin-bottom: 20px;
+        }
+
+        #booksList {
+            width: 80%;
+            max-width: 800px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .book {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+        }
+
+        .book h3 {
+            font-size: 20px;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .book p {
+            font-size: 16px;
+            color: #333333;
+            margin: 5px 0;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to BooksAreUs.org</h1>
+    <h2>Books Collection</h2>
+    <div id="booksList"></div>
+
+    <button onclick="signOut()">Sign Out</button>
+    <button onclick="location.href='addbook.html'">Add Book</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1017.0.min.js"></script>
+    <script>
+        AWS.config.region = 'your-region';
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+            IdentityPoolId: 'your-identity-pool-id'
+        });
+
+        function signOut() {
+            var poolData = {
+                UserPoolId: 'your-user-pool-id',
+                ClientId: 'your-client-id'
+            };
+            var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+            var cognitoUser = userPool.getCurrentUser();
+            if (cognitoUser != null) {
+                cognitoUser.signOut({
+                    onSuccess: function () {
+                        console.log('User signed out successfully');
+                        alert('User signed out successfully');
+                        window.location.href = 'index.html';
+                    },
+                    onFailure: function (err) {
+                        console.error('Error signing out:', err);
+                        alert('Error signing out');
+                    }
+                });
+            } else {
+                console.error('No user signed in');
+                alert('No user signed in');
+            }
+        }
+
+        // Function to load and display books data from API Gateway
+        function loadBooksData() {
+            // Use AWS SDK to call API Gateway endpoint and fetch books data
+            // Populate the booksList div with the retrieved data
+            // Example:
+            $('#booksList').html('<p>Loading books data...</p>');
+            $.ajax({
+                url: 'your-api-gateway-endpoint',
+                type: 'GET',
+                headers: {
+                    Authorization: 'Bearer ' + AWS.config.credentials.params.IdentityId
+                },
+                success: function (data) {
+                    // Parse and display books data
+                    $('#booksList').html('');
+                    for (var i = 0; i < data.length; i++) {
+                        var book = data[i];
+                        $('#booksList').append('<div class="book"><h3>' + book.Title + '</h3><p>Author: ' + book.Authors + '</p><p>Publisher: ' + book.Publisher + '</p><p>Year: ' + book.Year + '</p></div>');
+                    }
+                },
+                error: function (err) {
+                    console.error('Error fetching books data', err);
+                    $('#booksList').html('<p>Error fetching books data</p>');
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            loadBooksData();
+        });
+    </script>
+</body>
+
+</html>

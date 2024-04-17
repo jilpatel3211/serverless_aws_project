@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BooksAreUs.org - Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            color: #555555;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #007bff;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            font-size: 16px;
+            color: #666666;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Sign Up</h1>
+        <form onsubmit="signUp(); return false;">
+            <label for="email">Email:</label>
+            <input type="email" id="email" required><br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required><br><br>
+            <!-- Add more input fields for additional attributes if needed -->
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="signin.html">Sign In</a></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1017.0.min.js"></script>
+    <script>
+        AWS.config.region = 'us-east-1';
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+            IdentityPoolId: 'us-east-1:510ca8b2-8bd3-470f-8c4f-ed53643afc9e'
+        });
+
+        function signUp() {
+            console.log('Attempting to sign up...');
+            var email = $('#email').val();
+            var password = $('#password').val();
+            console.log('Email:', email);
+            console.log('Password:', password);
+
+            var poolData = {
+                UserPoolId: 'us-east-1_q7xI9ccke',
+                ClientId: '3ebvnp85nv6t0cjh81jsljq9'
+            };
+            console.log('Pool data:', poolData);
+
+            var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+            console.log('User pool:', userPool);
+
+            var attributeList = [];
+            var dataEmail = {
+                Name: 'email',
+                Value: email
+            };
+            var attributeEmail = new AmazonCognitoIdentity.CognitoUserAttribute(dataEmail);
+            attributeList.push(attributeEmail);
+            console.log('Attribute list:', attributeList);
+
+            userPool.signUp(email, password, attributeList, null, function (err, result) {
+                if (err) {
+                    console.error('Sign up error', err);
+                    alert('Sign up error');
+                    return;
+                }
+                console.log('Sign up successful', result);
+                alert('Sign up successful');
+                window.location.href = 'signin.html';
+            });
+        }
+    </script>
+</body>
+
+</html>

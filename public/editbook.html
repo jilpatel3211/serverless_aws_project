@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BooksAreUs.org - Edit Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+
+        form {
+            width: 80%;
+            max-width: 400px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 18px;
+            color: #333333;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Edit Book</h1>
+    <form onsubmit="editBook(); return false;">
+        <label for="title">Title:</label>
+        <input type="text" id="title" required><br>
+        <label for="author">Author:</label>
+        <input type="text" id="author" required><br>
+        <label for="publisher">Publisher:</label>
+        <input type="text" id="publisher" required><br>
+        <label for="year">Year:</label>
+        <input type="number" id="year" required><br>
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1017.0.min.js"></script>
+    <script>
+        // Function to retrieve book data and populate the form
+        function loadBookData(bookId) {
+            // Use AWS SDK to call API Gateway endpoint to fetch book data by ID
+            // Populate the form fields with the retrieved book data
+            // Example:
+            $.ajax({
+                url: 'your-api-gateway-endpoint/' + bookId,
+                type: 'GET',
+                headers: {
+                    Authorization: 'Bearer ' + AWS.config.credentials.params.IdentityId
+                },
+                success: function (data) {
+                    $('#title').val(data.Title);
+                    $('#author').val(data.Author);
+                    $('#publisher').val(data.Publisher);
+                    $('#year').val(data.Year);
+                },
+                error: function (err) {
+                    console.error('Error loading book data', err);
+                    alert('Error loading book data');
+                }
+            });
+        }
+
+        // Function to edit book details
+        function editBook() {
+            var title = $('#title').val();
+            var author = $('#author').val();
+            var publisher = $('#publisher').val();
+            var year = $('#year').val();
+            var bookId = ''; // Retrieve book ID from URL or elsewhere
+
+            // Use AWS SDK to call API Gateway endpoint to edit book details
+            // Example:
+            $.ajax({
+                url: 'your-api-gateway-endpoint/' + bookId,
+                type: 'PUT',
+                data: JSON.stringify({
+                    Title: title,
+                    Author: author,
+                    Publisher: publisher,
+                    Year: parseInt(year)
+                }),
+                headers: {
+                    Authorization: 'Bearer ' + AWS.config.credentials.params.IdentityId,
+                    'Content-Type': 'application/json'
+                },
+                success: function (data) {
+                    console.log('Book updated successfully', data);
+                    alert('Book updated successfully');
+                    // Redirect to books.html or perform any other action
+                    window.location.href = 'books.html';
+                },
+                error: function (err) {
+                    console.error('Error updating book', err);
+                    alert('Error updating book');
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            // Load book data when the page loads
+            // You need to retrieve the book ID from URL or elsewhere and pass it to loadBookData
+            loadBookData('bookId');
+        });
+    </script>
+</body>
+
+</html>
